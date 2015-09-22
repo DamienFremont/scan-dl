@@ -4,7 +4,7 @@ Extract and download full online manga from websites like http://mangafreak.me/.
 
 ## Usage
 
-* launch with command
+* launch with command from bin folder
 java manga-downloader.jar -url <manga-url>
 * wait...
 * get the result in generated folder
