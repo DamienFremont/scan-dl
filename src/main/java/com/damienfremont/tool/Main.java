@@ -36,17 +36,18 @@ public class Main {
 			while (true) {
 				System.out.println("reading page " + currentUrl);
 				driver.get(currentUrl);
-				ReadPage readPage = new ReadPage(driver);
-				readPage.isAt();
-				String imgUrl = readPage.imgUrl();
+				ReadPage page = new ReadPage(driver);
+				page.isAt();
+				String imgUrl = page.imgUrl();
 				System.out.println("downloading img from " + imgUrl);
 
-				String filename = String.format("downloaded/%d.jpg", i);
+				String pageTitle = page.pageTitle();
+				String filename = String.format("downloaded/%s/%d.jpg", pageTitle, i);
 				URL fileurl = new URL(imgUrl);
 				File file = new File(filename);
 				FileUtils.copyURLToFile(fileurl, file);
 
-				currentUrl = readPage.nextUrl();
+				currentUrl = page.nextUrl();
 				i++;
 			}
 		} catch (Exception e) {

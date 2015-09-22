@@ -49,4 +49,9 @@ public class ReadPage {
 	String imgUrl() {
 		return img().getAttribute("src");
 	}
+
+	String pageTitle() {
+		// TODO Auto-generated method stub
+		return driver.findElement(By.cssSelector(".title h1 a")).getText();
+	}
 }
