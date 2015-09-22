@@ -4,11 +4,8 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
-import java.nio.channels.Channels;
-import java.nio.channels.ReadableByteChannel;
 
 import org.apache.commons.io.FileUtils;
 import org.openqa.selenium.OutputType;
@@ -30,24 +27,34 @@ public class Main {
 		try {
 			driver = driverInit();
 			System.out.println("starting with at " + url);
-			String currentUrl = url;
 
+			String currentUrl = url;
 			int i = 1;
 			while (true) {
+				
 				System.out.println("reading page " + currentUrl);
+
 				driver.get(currentUrl);
 				ReadPage page = new ReadPage(driver);
 				page.isAt();
+				String serieTitle = page.serieTitle();
+				String chapterTitle = page.chapterTitle();
 				String imgUrl = page.imgUrl();
+				
 				System.out.println("downloading img from " + imgUrl);
+				
+				String format = "%1$03d";
+				String result = String.format(format, i);				
+				String filename = String.format("downloaded/%s-%s-%s.jpg", serieTitle, result, chapterTitle);
+				
+				System.out.println("saving to " + filename);
 
-				String pageTitle = page.pageTitle();
-				String filename = String.format("downloaded/%s/%d.jpg", pageTitle, i);
 				URL fileurl = new URL(imgUrl);
 				File file = new File(filename);
 				FileUtils.copyURLToFile(fileurl, file);
 
-				currentUrl = page.nextUrl();
+				page.next().click();
+				currentUrl = page.getUrl();
 				i++;
 			}
 		} catch (Exception e) {
@@ -61,7 +68,7 @@ public class Main {
 	private static void takeScreenshot() {
 		File scrFile = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
 		try {
-			FileUtils.copyFile(scrFile, new File("screenshot_failed.png"));
+			FileUtils.copyFile(scrFile, new File("downloaded/screenshot_failed.png"));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

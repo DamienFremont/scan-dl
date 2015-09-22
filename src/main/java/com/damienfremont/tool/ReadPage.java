@@ -19,8 +19,6 @@ public class ReadPage {
 	}
 
 	boolean isAt() {
-		assertTrue(driver.findElement(By.cssSelector(".logo_read")).getAttribute("href")
-				.contains("http://www.mangahere.co/"));
 		assertTrue(img().isDisplayed());
 		assertTrue(getPageList().isDisplayed());
 		return true;
@@ -50,8 +48,11 @@ public class ReadPage {
 		return img().getAttribute("src");
 	}
 
-	String pageTitle() {
-		// TODO Auto-generated method stub
+	String chapterTitle() {
 		return driver.findElement(By.cssSelector(".title h1 a")).getText();
+	}
+
+	String serieTitle() {
+		return driver.findElement(By.cssSelector(".title h2 a")).getText();
 	}
 }
