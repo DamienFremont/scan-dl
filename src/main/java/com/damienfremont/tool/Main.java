@@ -6,6 +6,8 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import org.apache.commons.io.FileUtils;
 import org.openqa.selenium.OutputType;
@@ -24,6 +26,11 @@ public class Main {
 		checkArgument(args.length > 0, "args are needed");
 		String url = getUrl(args);
 		checkArgument(url != null, "-url arg value must not be null");
+
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_hhmmss");
+		String ts = sdf.format(new Date());
+		String target = String.format("target/%s", ts);
+
 		try {
 			driver = driverInit();
 			System.out.println("starting with at " + url);
@@ -31,7 +38,7 @@ public class Main {
 			String currentUrl = url;
 			int i = 1;
 			while (true) {
-				
+
 				System.out.println("reading page " + currentUrl);
 
 				driver.get(currentUrl);
@@ -40,13 +47,13 @@ public class Main {
 				String serieTitle = page.serieTitle();
 				String chapterTitle = page.chapterTitle();
 				String imgUrl = page.imgUrl();
-				
+
 				System.out.println("downloading img from " + imgUrl);
-				
+
 				String format = "%1$03d";
-				String result = String.format(format, i);				
-				String filename = String.format("downloaded/%s-%s-%s.jpg", serieTitle, result, chapterTitle);
-				
+				String result = String.format(format, i);
+				String filename = String.format("%s/%s-%s-%s.jpg", target, serieTitle, result, chapterTitle);
+
 				System.out.println("saving to " + filename);
 
 				URL fileurl = new URL(imgUrl);
@@ -58,17 +65,17 @@ public class Main {
 				i++;
 			}
 		} catch (Exception e) {
-			takeScreenshot();
+			takeScreenshot(target);
 			Throwables.propagate(e);
 		} finally {
 			driver.quit();
 		}
 	}
 
-	private static void takeScreenshot() {
+	private static void takeScreenshot(String target) {
 		File scrFile = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
 		try {
-			FileUtils.copyFile(scrFile, new File("downloaded/screenshot_failed.png"));
+			FileUtils.copyFile(scrFile, new File(target + "/screenshot_failed.png"));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -92,9 +99,9 @@ public class Main {
 	private static WebDriver driver;
 
 	private static WebDriver driverInit() {
-		driver = new PhantomJSDriver(new DesiredCapabilities(ImmutableMap.of( //
-				PhantomJSDriverService.PHANTOMJS_EXECUTABLE_PATH_PROPERTY, //
-				new PhantomJsDownloader().downloadAndExtract().getAbsolutePath())));
+		driver = new PhantomJSDriver(
+				new DesiredCapabilities(ImmutableMap.of(PhantomJSDriverService.PHANTOMJS_EXECUTABLE_PATH_PROPERTY,
+						new PhantomJsDownloader().downloadAndExtract().getAbsolutePath())));
 		driver.manage().timeouts().implicitlyWait(5, SECONDS);
 		return driver;
 	}
