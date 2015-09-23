@@ -1,13 +1,16 @@
 package com.damienfremont.tool;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static java.lang.String.format;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.openqa.selenium.OutputType;
@@ -16,6 +19,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.phantomjs.PhantomJSDriver;
 import org.openqa.selenium.phantomjs.PhantomJSDriverService;
 import org.openqa.selenium.remote.DesiredCapabilities;
+import org.openqa.selenium.remote.UnreachableBrowserException;
 
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
@@ -33,36 +37,37 @@ public class Main {
 
 		try {
 			driver = driverInit();
-			System.out.println("starting with at " + url);
+			System.out.println("starting at " + url);
 
-			String currentUrl = url;
+			driver.get(url);
+			ReadPage chapter = new ReadPage(driver);
+			chapter.isAt();
+
+			// SERIE
+			
+			String serieTitle = chapter.serieTitle();
+			System.out.println("reading serie " + serieTitle);
+			
+			// CHAPTER
+			
+			System.out.println("reading chapter " + chapter.chapterTitle());
+			System.out.println("chapter page count = " + chapter.getPageUrlList().size());
+
+			String fileNamePattern = target + "/" + serieTitle + "-%s-" + chapter.chapterTitle() + ".jpg";
+
 			int i = 1;
-			while (true) {
-
-				System.out.println("reading page " + currentUrl);
-
-				driver.get(currentUrl);
-				ReadPage page = new ReadPage(driver);
-				page.isAt();
-				String serieTitle = page.serieTitle();
-				String chapterTitle = page.chapterTitle();
-				String imgUrl = page.imgUrl();
-
-				System.out.println("downloading img from " + imgUrl);
-
-				String format = "%1$03d";
-				String result = String.format(format, i);
-				String filename = String.format("%s/%s-%s-%s.jpg", target, serieTitle, result, chapterTitle);
-
-				System.out.println("saving to " + filename);
-
-				URL fileurl = new URL(imgUrl);
-				File file = new File(filename);
-				FileUtils.copyURLToFile(fileurl, file);
-
-				page.next().click();
-				currentUrl = page.getUrl();
-				i++;
+			for (String pageUrl : chapter.getPageUrlList()) {
+				
+				// PAGE
+				
+				try {
+					String fileName = format(fileNamePattern, format("%1$03d", i));
+					downloadImg(pageUrl, fileName);
+					i++;
+				} catch (UnreachableBrowserException e) {
+					System.out.println("relaunching webdriver (UnreachableBrowserException)");
+					driver = driverInit();
+				}
 			}
 		} catch (Exception e) {
 			takeScreenshot(target);
@@ -70,6 +75,16 @@ public class Main {
 		} finally {
 			driver.quit();
 		}
+	}
+
+	private static void downloadImg(String sourcePageUrl, String targetFileName)
+			throws IOException, MalformedURLException {
+		driver.get(sourcePageUrl);
+		ReadPage page = new ReadPage(driver);
+		page.isAt();
+		String imgUrl = page.imgUrl();
+		System.out.println(String.format("saving img %s from %s to %s", imgUrl, sourcePageUrl, targetFileName));
+		FileUtils.copyURLToFile(new URL(imgUrl), new File(targetFileName));
 	}
 
 	private static void takeScreenshot(String target) {
@@ -102,7 +117,7 @@ public class Main {
 		driver = new PhantomJSDriver(
 				new DesiredCapabilities(ImmutableMap.of(PhantomJSDriverService.PHANTOMJS_EXECUTABLE_PATH_PROPERTY,
 						new PhantomJsDownloader().downloadAndExtract().getAbsolutePath())));
-		driver.manage().timeouts().implicitlyWait(5, SECONDS);
+		driver.manage().timeouts().implicitlyWait(10, SECONDS);
 		return driver;
 	}
 

@@ -1,6 +1,9 @@
 package com.damienfremont.tool;
 
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
@@ -18,34 +21,21 @@ public class ReadPage {
 		return driver.getCurrentUrl();
 	}
 
-	boolean isAt() {
-		assertTrue(img().isDisplayed());
-		assertTrue(getPageList().isDisplayed());
-		return true;
+	void isAt() {
+		assertThat(imgUrl()).isNotEmpty();
+		assertThat(getPageUrlList()).isNotEmpty();
 	}
 
-	WebElement getPageList() {
-		return driver.findElement(By.cssSelector(".wid60"));
-	}
-
-	WebElement getPageListFirst() {
-		return driver.findElement(By.cssSelector(".wid60 option:first-child"));
-	}
-
-	WebElement next() {
-		return driver.findElement(By.cssSelector("a.next_page"));
-	}
-
-	String nextUrl() {
-		return next().getAttribute("href");
-	}
-
-	WebElement img() {
-		return driver.findElement(By.cssSelector(".read_img img"));
+	List<String> getPageUrlList() {
+		WebElement e = driver.findElement(By.cssSelector(".wid60"));
+		List<WebElement> es = e.findElements(By.cssSelector("option"));
+		return es.stream() //
+				.map(i -> i.getAttribute("value")) //
+				.collect(Collectors.toList());
 	}
 
 	String imgUrl() {
-		return img().getAttribute("src");
+		return driver.findElement(By.cssSelector(".read_img img")).getAttribute("src");
 	}
 
 	String chapterTitle() {
