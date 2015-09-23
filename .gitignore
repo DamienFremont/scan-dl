@@ -4,3 +4,4 @@
 .settings
 .phantomjstest
 downloaded
+/bin/target/

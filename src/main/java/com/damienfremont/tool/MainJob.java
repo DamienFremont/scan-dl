@@ -88,6 +88,7 @@ public class MainJob {
 			Throwables.propagate(e);
 		} finally {
 			driver.quit();
+			System.out.println("ending at " + url);
 		}
 	}
 
