@@ -83,12 +83,13 @@ public class MainJob {
 					driver = driverInit();
 				}
 			}
+			System.out.println("ending at " + url);
 		} catch (Exception e) {
 			takeScreenshot(target);
+			System.out.println("error at " + url);
 			Throwables.propagate(e);
 		} finally {
 			driver.quit();
-			System.out.println("ending at " + url);
 		}
 	}
 
