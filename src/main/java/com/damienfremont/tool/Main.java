@@ -28,42 +28,62 @@ public class Main {
 
 	public static void main(String[] args) {
 		checkArgument(args.length > 0, "args are needed");
-		String url = getUrl(args);
-		checkArgument(url != null, "-url arg value must not be null");
+		String serieUrl = getUrl(args);
+		checkArgument(serieUrl != null, "-url arg value must not be null");
 
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_hhmmss");
-		String ts = sdf.format(new Date());
-		String target = String.format("target/%s", ts);
+		String target = target();
 
 		try {
 			driver = driverInit();
-			System.out.println("starting at " + url);
-
-			driver.get(url);
-			ReadPage chapter = new ReadPage(driver);
-			chapter.isAt();
+			System.out.println("starting at " + serieUrl);
 
 			// SERIE
 			
-			String serieTitle = chapter.serieTitle();
-			System.out.println("reading serie " + serieTitle);
-			
-			// CHAPTER
-			
-			System.out.println("reading chapter " + chapter.chapterTitle());
-			System.out.println("chapter page count = " + chapter.getPageUrlList().size());
+			driver.get(serieUrl);
+			ReadPage serie = new ReadPage(driver);
+			serie.isAt();
+			String serieTitle = serie.serieTitle();
+			List<String> chatperUrlList = serie.getChatperUrlList();
+			System.out.println("reading serie " + serieTitle + " count =  " + chatperUrlList.size());
 
-			String fileNamePattern = target + "/" + serieTitle + "-%s-" + chapter.chapterTitle() + ".jpg";
+			// CHAPTER LIST
 
-			int i = 1;
-			for (String pageUrl : chapter.getPageUrlList()) {
-				
-				// PAGE
-				
+			int iChapter = 0;
+			while (iChapter < chatperUrlList.size()) {
+				String chapterUrl = chatperUrlList.get(iChapter);
 				try {
-					String fileName = format(fileNamePattern, format("%1$03d", i));
-					downloadImg(pageUrl, fileName);
-					i++;
+
+					// CHAPTER
+
+					driver.get(chapterUrl);
+					ReadPage chapter = new ReadPage(driver);
+					chapter.isAt();
+					String chapterTitle = chapter.chapterTitle();
+					List<String> pageUrlList = chapter.getPageUrlList();
+					System.out.println("reading chapter " + iChapter+1 + " : " + chapterTitle + " with page count = "
+							+ pageUrlList.size() + " from " + chapterUrl);
+
+					// PAGE LIST
+
+					int iPage = 0;
+					while (iPage < pageUrlList.size()) {
+						String pageUrl = pageUrlList.get(iPage);
+
+						// PAGE
+
+						try {
+
+							String fileName = formatFileName(target, serieTitle, iChapter+1, iPage+1);
+							downloadImg(pageUrl, fileName);
+							iPage++;
+
+						} catch (UnreachableBrowserException e) {
+							System.out.println("relaunching webdriver (UnreachableBrowserException)");
+							driver = driverInit();
+						}
+					}
+					iChapter++;
+
 				} catch (UnreachableBrowserException e) {
 					System.out.println("relaunching webdriver (UnreachableBrowserException)");
 					driver = driverInit();
@@ -77,13 +97,27 @@ public class Main {
 		}
 	}
 
+	private static String target() {
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_hhmmss");
+		String ts = sdf.format(new Date());
+		String target = String.format("target/%s", ts);
+		return target;
+	}
+
+	private static String formatFileName(String target, String serieTitle, int iChapter, int iPage) {
+		String chapter = format("%1$03d", iChapter);
+		String page = format("%1$03d", iPage);
+		String fileName = format("%s/%s-chapter_%s-page_%s.jpg", target, serieTitle, chapter, page);
+		return fileName;
+	}
+
 	private static void downloadImg(String sourcePageUrl, String targetFileName)
 			throws IOException, MalformedURLException {
 		driver.get(sourcePageUrl);
 		ReadPage page = new ReadPage(driver);
 		page.isAt();
 		String imgUrl = page.imgUrl();
-		System.out.println(String.format("saving img %s from %s to %s", imgUrl, sourcePageUrl, targetFileName));
+		System.out.println(String.format("saving %s from img %s at %s", targetFileName, imgUrl, sourcePageUrl));
 		FileUtils.copyURLToFile(new URL(imgUrl), new File(targetFileName));
 	}
 

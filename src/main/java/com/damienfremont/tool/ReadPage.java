@@ -16,11 +16,7 @@ public class ReadPage {
 	public ReadPage(WebDriver driver) {
 		this.driver = driver;
 	}
-
-	String getUrl() {
-		return driver.getCurrentUrl();
-	}
-
+	
 	void isAt() {
 		assertThat(imgUrl()).isNotEmpty();
 		assertThat(getPageUrlList()).isNotEmpty();
@@ -44,5 +40,13 @@ public class ReadPage {
 
 	String serieTitle() {
 		return driver.findElement(By.cssSelector(".title h2 a")).getText();
+	}
+
+	List<String> getChatperUrlList() {
+		WebElement e = driver.findElement(By.cssSelector("#top_chapter_list"));
+		List<WebElement> es = e.findElements(By.cssSelector("option"));
+		return es.stream() //
+				.map(i -> i.getAttribute("value")) //
+				.collect(Collectors.toList());
 	}
 }
