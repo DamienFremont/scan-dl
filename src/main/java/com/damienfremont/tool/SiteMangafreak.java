@@ -1,8 +1,11 @@
 package com.damienfremont.tool;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 
 public class SiteMangafreak extends Site {
 
@@ -11,27 +14,26 @@ public class SiteMangafreak extends Site {
 	}
 
 	public String serieTitle() {
-		// TODO Auto-generated method stub
-		return null;
+		return driver.findElement(By.cssSelector("h5.aname")).getText();
 	}
 
 	public List<String> chatperUrlList() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	public String chapterTitle() {
-		// TODO Auto-generated method stub
-		return null;
+		List<WebElement> es = driver.findElements(By.cssSelector("#listing a"));
+		return es.stream() //
+				.map(i -> i.getAttribute("href")) //
+				.collect(Collectors.toList());
 	}
 
 	public List<String> pageUrlList() {
-		// TODO Auto-generated method stub
-		return null;
+		WebElement e = driver.findElement(By.cssSelector("#pageMenu"));
+		String baseUrl = driver.getCurrentUrl().split("/")[0] + "//" + driver.getCurrentUrl().split("/")[2];
+		List<WebElement> es = e.findElements(By.cssSelector("option"));
+		return es.stream() //
+				.map(i -> baseUrl + i.getAttribute("value")) //
+				.collect(Collectors.toList());
 	}
 
 	public String imgUrl() {
-		// TODO Auto-generated method stub
-		return null;
+		return driver.findElement(By.cssSelector("#img")).getAttribute("src");
 	}
 }

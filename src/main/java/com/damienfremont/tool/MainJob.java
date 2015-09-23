@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
@@ -49,10 +50,9 @@ public class MainJob {
 
 					driver.get(chapterUrl);
 					PageChapter chapter = siteFactory(chapterUrl);
-					String chapterTitle = chapter.chapterTitle();
 					List<String> pageUrlList = chapter.pageUrlList();
-					System.out.println("reading chapter " + iChapter + 1 + " : " + chapterTitle + " with page count = "
-							+ pageUrlList.size() + " from " + chapterUrl);
+					System.out.println("reading chapter " + iChapter + 1 + " with page count = " + pageUrlList.size()
+							+ " from " + chapterUrl);
 
 					// PAGE LIST
 
@@ -64,12 +64,14 @@ public class MainJob {
 
 						try {
 
-							String fileName = formatFileName(target, serieTitle, iChapter + chapterIndexOverride, iPage + 1);
+							String fileName = formatFileName(target, serieTitle, iChapter + chapterIndexOverride,
+									iPage + 1);
 							downloadImg(pageUrl, fileName);
 							iPage++;
 
 						} catch (UnreachableBrowserException e) {
 							System.out.println("relaunching webdriver (UnreachableBrowserException)");
+							driver.quit();
 							driver = driverInit();
 						}
 					}
@@ -77,6 +79,7 @@ public class MainJob {
 
 				} catch (UnreachableBrowserException e) {
 					System.out.println("relaunching webdriver (UnreachableBrowserException)");
+					driver.quit();
 					driver = driverInit();
 				}
 			}
@@ -104,12 +107,18 @@ public class MainJob {
 		return fileName;
 	}
 
-	private void downloadImg(String url, String fileName) throws IOException, MalformedURLException {
-		driver.get(url);
-		Page page = siteFactory(url);
+	private void downloadImg(String pageUrl, String fileName) throws IOException, MalformedURLException {
+		driver.get(pageUrl);
+		Page page = siteFactory(pageUrl);
 		String imgUrl = page.imgUrl();
-		System.out.println(String.format("saving %s from img %s at %s", fileName, imgUrl, url));
-		FileUtils.copyURLToFile(new URL(imgUrl), new File(fileName));
+		System.out.println(String.format("saving %s from img %s at %s", fileName, imgUrl, pageUrl));
+		URL url = new URL(imgUrl);
+		File file = new File(fileName);
+		URLConnection conn = url.openConnection();
+		conn.setRequestProperty("User-Agent",
+				"Mozilla/5.0 (Windows NT 6.1; WOW64; rv:31.0) Gecko/20100101 Firefox/31.0");
+		conn.connect();
+		FileUtils.copyInputStreamToFile(conn.getInputStream(), file);
 	}
 
 	private void takeScreenshot(String target) {

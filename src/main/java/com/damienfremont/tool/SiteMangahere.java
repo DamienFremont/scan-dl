@@ -1,5 +1,6 @@
 package com.damienfremont.tool;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -16,22 +17,18 @@ public class SiteMangahere extends Site {
 	// SERIE
 
 	public String serieTitle() {
-		return driver.findElement(By.cssSelector(".title h2 a")).getText();
+		return driver.findElement(By.cssSelector("h1.title")).getText();
 	}
 
 	public List<String> chatperUrlList() {
-		WebElement e = driver.findElement(By.cssSelector("#top_chapter_list"));
-		List<WebElement> es = e.findElements(By.cssSelector("option"));
+		List<WebElement> es = driver.findElements(By.cssSelector(".detail_list .left a"));
+		Collections.reverse(es);
 		return es.stream() //
-				.map(i -> i.getAttribute("value")) //
+				.map(i -> i.getAttribute("href")) //
 				.collect(Collectors.toList());
 	}
 
 	// CHAPTER
-
-	public String chapterTitle() {
-		return driver.findElement(By.cssSelector(".title h1 a")).getText();
-	}
 
 	public List<String> pageUrlList() {
 		WebElement e = driver.findElement(By.cssSelector(".wid60"));
@@ -44,7 +41,7 @@ public class SiteMangahere extends Site {
 	// PAGE
 
 	public String imgUrl() {
-		return driver.findElement(By.cssSelector(".read_img img")).getAttribute("src");
+		return driver.findElement(By.cssSelector("#image")).getAttribute("src");
 	}
 
 }
