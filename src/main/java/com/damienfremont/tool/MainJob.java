@@ -26,7 +26,7 @@ public class MainJob {
 
 	private WebDriver driver;
 
-	void execute(String url, String target, int chapterIndexOverride) {
+	void execute(String url, String target, int chapterIndexOverride, int chapterIndexStart) {
 		try {
 			driver = driverInit();
 			System.out.println("starting at " + url);
@@ -41,7 +41,7 @@ public class MainJob {
 
 			// CHAPTER LIST
 
-			int iChapter = 0;
+			int iChapter = chapterIndexStart;
 			while (iChapter < chatperUrlList.size()) {
 				String chapterUrl = chatperUrlList.get(iChapter);
 				try {
@@ -51,7 +51,7 @@ public class MainJob {
 					driver.get(chapterUrl);
 					PageChapter chapter = siteFactory(chapterUrl);
 					List<String> pageUrlList = chapter.pageUrlList();
-					System.out.println("reading chapter " + iChapter + 1 + " with page count = " + pageUrlList.size()
+					System.out.println("reading chapter " + (iChapter + 1) + " with page count = " + pageUrlList.size()
 							+ " from " + chapterUrl);
 
 					// PAGE LIST
@@ -98,8 +98,10 @@ public class MainJob {
 			return new SiteMangahere(driver);
 		else if (siteUrl.contains("mangafreak"))
 			return new SiteMangafreak(driver);
+		else if (siteUrl.contains("mangapark"))
+			return new SiteMangapark(driver);
 		throw new IllegalArgumentException(
-				"This website is not supported by this tool. Try instead: mangahere, mangafreak");
+				"This website is not supported by this tool. Try instead: mangahere, mangafreak, mangapark");
 	}
 
 	private String formatFileName(String target, String serieTitle, int iChapter, int iPage) {

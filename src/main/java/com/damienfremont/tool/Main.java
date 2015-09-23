@@ -9,44 +9,39 @@ public class Main {
 
 	public static void main(String[] args) {
 		checkArgument(args.length > 0, "args are needed");
-		String url = getArgUrl(args);
+		String url = getArg(args, "-url", null);
 		checkArgument(url != null, "-url arg value must not be null");
-		int chapterIndexOverride = getArgChapterIndexOverride(args);
+		int chapterIndexOverride = Integer.valueOf( //
+				getArg(args, "-chapterIndexOverride", "1")).intValue();
+		int chapterIndexStart = Integer.valueOf( //
+				getArg(args, "-chapterIndexStart", "0")).intValue();
 		String target = targetFolder();
-		new MainJob().execute(url, target, chapterIndexOverride);
+		new MainJob().execute(//
+				url, //
+				target, //
+				chapterIndexOverride, //
+				chapterIndexStart);
 	}
 
-	static String targetFolder() {
+	private static String targetFolder() {
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_hhmmss");
 		String ts = sdf.format(new Date());
 		String target = String.format("target/%s", ts);
 		return target;
 	}
 
-	static String getArgUrl(String[] args) {
+	private static String getArg(String[] args, String param, String defaultValue) {
 		for (int i = 0; i < args.length; i++) {
 			String arg = args[i];
-			if ("-url".equals(arg)) {
+			if (param.equals(arg)) {
 				int iValue = i + 1;
-				checkArgument(args.length > iValue, "-url arg value must not be null");
-				String url = args[iValue];
-				checkArgument(url != null, "-url arg value must not be null");
-				checkArgument(!url.isEmpty(), "-url arg value must not be empty");
-				return url;
-			}
-		}
-		return null;
-	}
-
-	static int getArgChapterIndexOverride(String[] args) {
-		for (int i = 0; i < args.length; i++) {
-			String arg = args[i];
-			if ("-chapterIndexStartLabel".equals(arg)) {
-				int iValue = i + 1;
+				checkArgument(args.length > iValue, param + " arg value must not be null");
 				String iChapter = args[iValue];
-				return Integer.valueOf(iChapter).intValue();
+				checkArgument(iChapter != null, param + " arg value must not be null");
+				checkArgument(!iChapter.isEmpty(), param + " arg value must not be empty");
+				return iChapter;
 			}
 		}
-		return 1;
+		return defaultValue;
 	}
 }

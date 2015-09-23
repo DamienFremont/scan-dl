@@ -14,8 +14,6 @@ public class SiteMangahere extends Site {
 		super(driver);
 	}
 
-	// SERIE
-
 	public String serieTitle() {
 		return driver.findElement(By.cssSelector("h1.title")).getText();
 	}
@@ -28,8 +26,6 @@ public class SiteMangahere extends Site {
 				.collect(Collectors.toList());
 	}
 
-	// CHAPTER
-
 	public List<String> pageUrlList() {
 		WebElement e = driver.findElement(By.cssSelector(".wid60"));
 		List<WebElement> es = e.findElements(By.cssSelector("option"));
@@ -37,8 +33,6 @@ public class SiteMangahere extends Site {
 				.map(i -> i.getAttribute("value")) //
 				.collect(Collectors.toList());
 	}
-
-	// PAGE
 
 	public String imgUrl() {
 		return driver.findElement(By.cssSelector("#image")).getAttribute("src");
