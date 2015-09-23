@@ -49,4 +49,7 @@ java -jar manga-downloader.jar -url http://www.mangahere.co/manga/sidonia_no_kis
 ```
 result: in folder target/2015...
 
+java -jar manga-downloader-jar-with-dependencies -url http://www.mangahere.co/manga/sidonia_no_kishi/v01/c000/
+result: in folder target/2015...
+
 (WORK IN PROGRESS)
