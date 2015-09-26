@@ -41,8 +41,12 @@ public class SitesTest {
 	@Test
 	public void test_mangapark() {
 		String url = "http://mangapark.me/manga/sidonia-no-kishi";
+		String chapterIndexStart = "74";
+		String chapterIndexOverride = "-3";
 		Main.main(new String[] { //
-				"-url", url });
+				"-url", url, //
+				"-chapterIndexOverride", chapterIndexOverride, //
+				"-chapterIndexStart", chapterIndexStart });
 	}
 	
 }
