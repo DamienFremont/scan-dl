@@ -1,7 +1,9 @@
-package com.damienfremont.tool;
+package com.damienfremont.tool.siteimpl;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.damienfremont.tool.MainJob;
+import com.damienfremont.tool.Site;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

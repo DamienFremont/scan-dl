@@ -5,3 +5,5 @@
 .phantomjstest
 downloaded
 /bin/target/
+.idea
+*.iml

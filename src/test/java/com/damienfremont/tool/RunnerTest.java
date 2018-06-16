@@ -2,7 +2,7 @@ package com.damienfremont.tool;
 
 import org.junit.Test;
 
-public class SitesTest {
+public class RunnerTest {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void test_wrong() {
@@ -47,6 +47,13 @@ public class SitesTest {
 				"-url", url, //
 				"-chapterIndexOverride", chapterIndexOverride, //
 				"-chapterIndexStart", chapterIndexStart });
+	}
+	
+	@Test
+	public void download_dragonball_on_japscan() {
+		String url = "https://www.japscan.cc/mangas/dragon-ball-perfect-edition/";
+		Main.main(new String[] { //
+				"-url", url });
 	}
 	
 }

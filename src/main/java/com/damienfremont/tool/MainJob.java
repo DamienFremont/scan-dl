@@ -19,7 +19,10 @@ import org.openqa.selenium.phantomjs.PhantomJSDriverService;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.UnreachableBrowserException;
 
-import com.google.common.base.Throwables;
+import com.damienfremont.tool.siteimpl.SiteJapscan;
+import com.damienfremont.tool.siteimpl.SiteMangafreak;
+import com.damienfremont.tool.siteimpl.SiteMangahere;
+import com.damienfremont.tool.siteimpl.SiteMangapark;
 import com.google.common.collect.ImmutableMap;
 
 public class MainJob {
@@ -30,45 +33,34 @@ public class MainJob {
 		try {
 			driver = driverInit();
 			System.out.println("starting at " + url);
-
 			// SERIE
-
 			driver.get(url);
 			PageSerie serie = siteFactory(url);
 			String serieTitle = serie.serieTitle();
 			List<String> chatperUrlList = serie.chatperUrlList();
 			System.out.println("reading serie " + serieTitle + " count =  " + chatperUrlList.size());
-
 			// CHAPTER LIST
-
 			int iChapter = chapterIndexStart;
 			while (iChapter < chatperUrlList.size()) {
 				String chapterUrl = chatperUrlList.get(iChapter);
 				try {
-
 					// CHAPTER
-
 					driver.get(chapterUrl);
 					PageChapter chapter = siteFactory(chapterUrl);
 					List<String> pageUrlList = chapter.pageUrlList();
 					System.out.println("reading chapter " + (iChapter + 1) + " with page count = " + pageUrlList.size()
 							+ " from " + chapterUrl);
-
 					// PAGE LIST
-
 					int iPage = 0;
 					while (iPage < pageUrlList.size()) {
 						String pageUrl = pageUrlList.get(iPage);
-
 						// PAGE
-
 						try {
 
 							String fileName = formatFileName(target, serieTitle, iChapter + chapterIndexOverride,
 									iPage + 1);
 							downloadImg(pageUrl, fileName);
 							iPage++;
-
 						} catch (UnreachableBrowserException e) {
 							System.out.println("relaunching webdriver (UnreachableBrowserException)");
 							driver.quit();
@@ -87,7 +79,7 @@ public class MainJob {
 		} catch (Exception e) {
 			takeScreenshot(target);
 			System.out.println("error at " + url);
-			Throwables.propagate(e);
+			throw new RuntimeException(e);
 		} finally {
 			driver.quit();
 		}
@@ -100,8 +92,10 @@ public class MainJob {
 			return new SiteMangafreak(driver);
 		else if (siteUrl.contains("mangapark"))
 			return new SiteMangapark(driver);
+		else if (siteUrl.contains("japscan"))
+			return new SiteJapscan(driver);
 		throw new IllegalArgumentException(
-				"This website is not supported by this tool. Try instead: mangahere, mangafreak, mangapark");
+				"This website is not supported by this tool. Try instead: mangahere, mangafreak, mangapark, japscan");
 	}
 
 	private String formatFileName(String target, String serieTitle, int iChapter, int iPage) {
@@ -134,10 +128,10 @@ public class MainJob {
 		}
 	}
 
-	WebDriver driverInit() {
+	public WebDriver driverInit() {
 		driver = new PhantomJSDriver(
 				new DesiredCapabilities(ImmutableMap.of(PhantomJSDriverService.PHANTOMJS_EXECUTABLE_PATH_PROPERTY,
-						new PhantomJsDownloader().downloadAndExtract().getAbsolutePath())));
+						new File(".phantomjstest/phantomjs-2.1.1-windows/bin/phantomjs.exe").getAbsolutePath())));
 		driver.manage().timeouts().implicitlyWait(10, SECONDS);
 		return driver;
 	}
