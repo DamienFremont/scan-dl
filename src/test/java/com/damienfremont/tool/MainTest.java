@@ -18,32 +18,32 @@ public class MainTest {
 	@Test
 	public void test_args_url_none() {
 		try {
-			Main.main(new String[] { "-url" });
+			Main.main(new String[] { "--url" });
 		} catch (IllegalArgumentException e) {
-			assertThat(e.getMessage()).contains("-url arg value must not be null");
+			assertThat(e.getMessage()).contains("--url arg value must not be null");
 		}
 	}
 
 	@Test
 	public void test_args_url_null() {
 		try {
-			Main.main(new String[] { "-url", null });
+			Main.main(new String[] { "--url", null });
 		} catch (IllegalArgumentException e) {
-			assertThat(e.getMessage()).contains("-url arg value must not be null");
+			assertThat(e.getMessage()).contains("--url arg value must not be null");
 		}
 	}
 
 	@Test
 	public void test_args_url_empty() {
 		try {
-			Main.main(new String[] { "-url", "" });
+			Main.main(new String[] { "--url", "" });
 		} catch (IllegalArgumentException e) {
-			assertThat(e.getMessage()).contains("-url arg value must not be empty");
+			assertThat(e.getMessage()).contains("--url arg value must not be empty");
 		}
 	}
 
 	@Test
 	public void test_args_url_ok() {
-		Main.main(new String[] { "-url", "xxx" });
+		Main.main(new String[] { "--url", "xxx" });
 	}
 }

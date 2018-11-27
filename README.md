@@ -1,4 +1,4 @@
-# Manga Downloader
+# scan-dl
 
 Extract and download full online manga from websites like http://mangafreak.me/.
 
@@ -6,7 +6,7 @@ Extract and download full online manga from websites like http://mangafreak.me/.
 
 * launch with command from bin folder
 ```
-java -jar manga-downloader.jar -url YOU_SERIE_URL
+java -jar scan-dl.jar -url YOU_SERIE_URL
 ```
 * accept security exception for phantomjs browser
 * wait for ending...
@@ -25,7 +25,7 @@ URLs for MangaHere
 
 ## Example for a serie
 ```
-java -jar manga-downloader.jar -url http://mangafreak.me/series1/knights-of-sidonia
+java -jar scan-dl.jar -url http://mangafreak.me/series1/knights-of-sidonia
 ```
 result: in folder target/2015...
 
@@ -45,11 +45,11 @@ result: in folder target/2015...
 
 ## Example for a chapter
 ```
-java -jar manga-downloader.jar -url http://www.mangahere.co/manga/sidonia_no_kishi/v01/c000/
+java -jar scan-dl.jar -url http://www.mangahere.co/manga/sidonia_no_kishi/v01/c000/
 ```
 result: in folder target/2015...
 
-java -jar manga-downloader-jar-with-dependencies -url http://www.mangahere.co/manga/sidonia_no_kishi/v01/c000/
+java -jar scan-dl-jar-with-dependencies -url http://www.mangahere.co/manga/sidonia_no_kishi/v01/c000/
 result: in folder target/2015...
 
 (WORK IN PROGRESS)

@@ -19,6 +19,7 @@ import org.openqa.selenium.phantomjs.PhantomJSDriverService;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.UnreachableBrowserException;
 
+import com.damienfremont.tool.siteimpl.SiteE;
 import com.damienfremont.tool.siteimpl.SiteJapscan;
 import com.damienfremont.tool.siteimpl.SiteMangafreak;
 import com.damienfremont.tool.siteimpl.SiteMangahere;
@@ -29,59 +30,71 @@ public class MainJob {
 
 	private WebDriver driver;
 
-	void execute(String url, String target, int chapterIndexOverride, int chapterIndexStart) {
+	void execute(String url, String type, String target, int chapterIndexOverride, int chapterIndexStart) {
 		try {
 			driver = driverInit();
-			System.out.println("starting at " + url);
-			// SERIE
-			driver.get(url);
-			PageSerie serie = siteFactory(url);
-			String serieTitle = serie.serieTitle();
-			List<String> chatperUrlList = serie.chatperUrlList();
-			System.out.println("reading serie " + serieTitle + " count =  " + chatperUrlList.size());
-			// CHAPTER LIST
-			int iChapter = chapterIndexStart;
-			while (iChapter < chatperUrlList.size()) {
-				String chapterUrl = chatperUrlList.get(iChapter);
-				try {
-					// CHAPTER
-					driver.get(chapterUrl);
-					PageChapter chapter = siteFactory(chapterUrl);
-					List<String> pageUrlList = chapter.pageUrlList();
-					System.out.println("reading chapter " + (iChapter + 1) + " with page count = " + pageUrlList.size()
-							+ " from " + chapterUrl);
-					// PAGE LIST
-					int iPage = 0;
-					while (iPage < pageUrlList.size()) {
-						String pageUrl = pageUrlList.get(iPage);
-						// PAGE
-						try {
-
-							String fileName = formatFileName(target, serieTitle, iChapter + chapterIndexOverride,
-									iPage + 1);
-							downloadImg(pageUrl, fileName);
-							iPage++;
-						} catch (UnreachableBrowserException e) {
-							System.out.println("relaunching webdriver (UnreachableBrowserException)");
-							driver.quit();
-							driver = driverInit();
-						}
-					}
-					iChapter++;
-
-				} catch (UnreachableBrowserException e) {
-					System.out.println("relaunching webdriver (UnreachableBrowserException)");
-					driver.quit();
-					driver = driverInit();
-				}
+			if ("chapter" == type) {
+				downloadChapter(url, target, chapterIndexOverride, "title", 0);
+			} else {
+				downloadSerie(url, target, chapterIndexOverride, chapterIndexStart);
 			}
-			System.out.println("ending at " + url);
 		} catch (Exception e) {
 			takeScreenshot(target);
 			System.out.println("error at " + url);
 			throw new RuntimeException(e);
 		} finally {
 			driver.quit();
+		}
+	}
+
+	private void downloadSerie(String url, String target, int chapterIndexOverride, int chapterIndexStart)
+			throws IOException, MalformedURLException {
+		System.out.println("starting at " + url);
+		// SERIE
+		driver.get(url);
+		PageSerie serie = siteFactory(url);
+		String serieTitle = serie.serieTitle();
+		List<String> chatperUrlList = serie.chatperUrlList();
+		System.out.println("reading serie " + serieTitle + " count =  " + chatperUrlList.size());
+		// CHAPTER LIST
+		int iChapter = chapterIndexStart;
+		while (iChapter < chatperUrlList.size()) {
+			String chapterUrl = chatperUrlList.get(iChapter);
+			try {
+				downloadChapter(chapterUrl, target, chapterIndexOverride, serieTitle, iChapter);
+				iChapter++;
+			} catch (UnreachableBrowserException e) {
+				System.out.println("relaunching webdriver (UnreachableBrowserException)");
+				driver.quit();
+				driver = driverInit();
+			}
+		}
+		System.out.println("ending at " + url);
+	}
+
+	private void downloadChapter(String chapterUrl, String target, int chapterIndexOverride, String serieTitle,
+			int iChapter) throws IOException, MalformedURLException {
+		// CHAPTER
+		driver.get(chapterUrl);
+		PageChapter chapter = siteFactory(chapterUrl);
+		List<String> pageUrlList = chapter.pageUrlList();
+		System.out.println("reading chapter " + (iChapter + 1) + " with page count = " + pageUrlList.size() + " from "
+				+ chapterUrl);
+		// PAGE LIST
+		int iPage = 0;
+		while (iPage < pageUrlList.size()) {
+			String pageUrl = pageUrlList.get(iPage);
+			// PAGE
+			try {
+
+				String fileName = formatFileName(target, serieTitle, iChapter + chapterIndexOverride, iPage + 1);
+				downloadImg(pageUrl, fileName);
+				iPage++;
+			} catch (UnreachableBrowserException e) {
+				System.out.println("relaunching webdriver (UnreachableBrowserException)");
+				driver.quit();
+				driver = driverInit();
+			}
 		}
 	}
 
@@ -94,6 +107,8 @@ public class MainJob {
 			return new SiteMangapark(driver);
 		else if (siteUrl.contains("japscan"))
 			return new SiteJapscan(driver);
+		else if (siteUrl.contains("e-hentai"))
+			return new SiteE(driver);
 		throw new IllegalArgumentException(
 				"This website is not supported by this tool. Try instead: mangahere, mangafreak, mangapark, japscan");
 	}

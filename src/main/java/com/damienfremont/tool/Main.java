@@ -9,15 +9,15 @@ public class Main {
 
 	public static void main(String[] args) {
 		checkArgument(args.length > 0, "args are needed");
-		String url = getArg(args, "-url", null);
-		checkArgument(url != null, "-url arg value must not be null");
-		int chapterIndexOverride = Integer.valueOf( //
-				getArg(args, "-chapterIndexOverride", "1")).intValue();
-		int chapterIndexStart = Integer.valueOf( //
-				getArg(args, "-chapterIndexStart", "0")).intValue();
+		String url = getArg(args, "--url", null);
+		checkArgument(url != null, "--url arg value must not be null");
+		int chapterIndexOverride = Integer.valueOf(getArg(args, "--chapterIndexOverride", "1")).intValue();
+		int chapterIndexStart = Integer.valueOf(getArg(args, "--chapterIndexStart", "0")).intValue();
+		String type = getArg(args, "--type", "all");
 		String target = targetFolder();
 		new MainJob().execute(//
 				url, //
+				type, //
 				target, //
 				chapterIndexOverride, //
 				chapterIndexStart);
